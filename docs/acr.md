@@ -49,9 +49,5 @@ The registry will have:
 ```bash
 az deployment group create \
   --resource-group <YourResourceGroup> \
-  --template-file ./main.bicep
+  --template-file ./acr.bicep
 ```
-
----
-
-Do you want me also to show you a short version or a more production-style version? Some teams prefer a more minimal or professional format depending on where you are going to use it. Just say *yes* if you want it.

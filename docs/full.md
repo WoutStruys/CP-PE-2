@@ -87,15 +87,6 @@ This setup provides a basic architecture to expose a private Azure Container Ins
 ```bash
 az deployment group create \
     --resource-group <YourResourceGroup> \
-    --template-file ./main.bicep \
+    --template-file ./full.bicep \
     --parameters acrUsername=<acr-user> acrPassword=<acr-password>
 ```
-
----
-
-If you want, I can also show you:
-1. a **diagram** version (architecture diagram)
-2. a **security recommendations** section (good for production)
-3. a **mini README** if you prefer it lightweight
-
-Just say *yes*, and I'll continue.

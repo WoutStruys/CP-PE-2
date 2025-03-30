@@ -60,14 +60,6 @@ This template will:
 ```bash
 az deployment group create \
   --resource-group <YourResourceGroup> \
-  --template-file ./container.bicep \
+  --template-file ./basic.bicep \
   --parameters acrUsername=<acr-user> acrPassword=<acr-password>
 ```
-
----
-
-If you want, I can also show you:
-- a production-grade README (with security notes, tips, and recommendations)
-- or a minimalist version
-
-Just say *yes* if you want me to extend it.
