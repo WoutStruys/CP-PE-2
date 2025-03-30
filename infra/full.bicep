@@ -293,4 +293,4 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01'
 
 
 // Output Public IP
-output publicIpAddress string = containerGroup.properties.ipAddress.ip
+output publicIpAddress string = appGwPublicIp.properties.ipAddress
