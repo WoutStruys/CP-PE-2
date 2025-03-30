@@ -109,10 +109,10 @@ acr_output=$(az deployment group create --resource-group $RESOURCE_GROUP --templ
 
 parse_acr_output "$acr_output"
 
-echo -e "${BLUE}==> Enable Admin on ACR...${NC}"
-acr_admin_output=$(az acr update -n acrwscrud --admin-enabled true)
+# echo -e "${BLUE}==> Enable Admin on ACR...${NC}"
+# acr_admin_output=$(az acr update -n acrwscrud --admin-enabled true)
 
-parse_acr_admin_output "$acr_admin_output"
+# parse_acr_admin_output "$acr_admin_output"
 
 echo -e "${BLUE}==> Logging into ACR...${NC}"
 az acr login --name $ACR_NAME
