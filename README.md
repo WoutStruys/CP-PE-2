@@ -12,10 +12,6 @@
 
 
 
-## Diagram
-
-### [📄 View the Architecture Diagram](./diagram.md)
-
 ## Automatic Deployment (Recommended)
 
 If you want to deploy everything automatically, just run:
