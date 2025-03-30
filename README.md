@@ -186,7 +186,7 @@ az acr credential show -n acrwscrud --query "{username:username, password:passwo
 
 ---
 
-## Step 12 - Deploy the Basic Infrastructure
+## Step 12a - Deploy the Basic Infrastructure
 
 Replace `<username>` and `<password>` with the actual values retrieved from Step 11.
 
@@ -194,6 +194,17 @@ Replace `<username>` and `<password>` with the actual values retrieved from Step
 az deployment group create \
     --resource-group rg-ws-crud-iac \
     --template-file ./infra/basic.bicep \
+    --parameters acrUsername=<username> acrPassword=<password>
+```
+
+## Step 12b - Deploy the Full Infrastructure
+
+Replace `<username>` and `<password>` with the actual values retrieved from Step 11.
+
+```bash
+az deployment group create \
+    --resource-group rg-ws-crud-iac \
+    --template-file ./infra/full.bicep \
     --parameters acrUsername=<username> acrPassword=<password>
 ```
 
