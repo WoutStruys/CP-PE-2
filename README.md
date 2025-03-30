@@ -1,7 +1,3 @@
-Sure! Here's a more professional, clean, and user-friendly version of your assignment, with inline explanations, validations, and tip boxes:
-
----
-
 # Assignment 2: Azure Infrastructure-as-Code
 
 ## Contents
