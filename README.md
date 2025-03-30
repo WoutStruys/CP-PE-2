@@ -1,94 +1,112 @@
+Sure! Here's a more professional, clean, and user-friendly version of your assignment, with inline explanations, validations, and tip boxes:
+
+---
+
 # Assignment 2: Azure Infrastructure-as-Code
 
-# Inhoud
+## Contents
 
-- [Diagram](docs/diagram.md)
+- [Architecture Diagram](docs/diagram.md)
 - [ACR Deployment Documentation](docs/acr.md)
 - [Basic Infrastructure Documentation](docs/basic.md)
 - [Full Infrastructure Documentation](docs/full.md)
-- [Automatic Deployment](#automatic-deployment-recommended)
+- [Automatic Deployment (Recommended)](#automatic-deployment-recommended)
 - [Automatic Cleanup](#automatic-cleanup)
-- [Manual Deployment (Step by Step)](#manual-deployment-step-by-step)
+- [Manual Deployment (Step-by-Step)](#manual-deployment-step-by-step)
 
+---
 
+## ✅ Automatic Deployment (Recommended)
 
-## Automatic Deployment (Recommended)
-
-If you want to deploy everything automatically, just run:
+To deploy everything automatically, simply execute:
 
 ```bash
 bash deploy.sh
 ```
 
-This script will:
+### What this script does:
+- Logs in to Azure (or checks if you are already logged in)
+- Creates the Resource Group
+- Deploys the Azure Container Registry (ACR)
+- Enables Admin on ACR (for easier development)
+- Builds, tags, and pushes the Docker Image to ACR
+- Deploys infrastructure using your Bicep templates
 
-- Login to Azure (or check if you're already logged in)
-- Create the Resource Group
-- Create the Azure Container Registry (ACR)
-- Enable Admin on ACR
-- Build, Tag, and Push the Docker Image
-- Deploy the Infrastructure using your Bicep templates
-
-> **Tip:** Make sure `deploy.sh` is executable:
+> 💡 **Tip**  
+> Make sure the script is executable before running it:
 > ```bash
 > chmod +x deploy.sh
 > ```
 
 ---
 
-## Automatic Cleanup
+## ✅ Automatic Cleanup
 
-To remove everything (resource group and all related resources) easily, run:
+To remove **all resources** (Resource Group and everything inside), run:
 
 ```bash
 bash clean.sh
 ```
 
-This script will:
+### What this script does:
+- Deletes the entire resource group (`rg-ws-crud-iac`)
+- Cleans up all Azure resources created during deployment
 
-- Delete the whole resource group (`rg-ws-crud-iac`)
-- Remove all Azure resources created by `deploy.sh`
-
-> **Tip:** Make sure `clean.sh` is executable:
+> 💡 **Tip**  
+> Don't forget to make the script executable:
 > ```bash
 > chmod +x clean.sh
 > ```
 
 ---
 
-## Manual Deployment (Step by Step)
+## ✅ Manual Deployment (Step-by-Step)
 
-If you prefer to deploy step by step, follow the instructions below:
-
-## Prerequisites
-Make sure you have the following installed and configured:
-
-- Azure CLI
-- Docker
-- jq (optional, but recommended for JSON parsing)
-- Valid Azure Subscription
+For those who want full control and understanding of each step:
 
 ---
 
-## Step 1 - Login to Azure
+### Prerequisites
+Ensure the following are installed:
+
+| Tool            | Purpose                         |
+|-----------------|---------------------------------|
+| Azure CLI       | For Azure resource management  |
+| Docker          | To build and manage containers |
+| jq *(optional)* | For JSON parsing in terminal   |
+| Azure Subscription | To deploy the infrastructure |
+
+---
+
+### Step 1 - Login to Azure
 
 ```bash
 az login
 ```
 
-Follow the prompt and select your subscription.
+Follow the prompt to authenticate.
+
+> ✅ **Check:** Verify your account and subscription:
+> ```bash
+> az account show
+> ```
 
 ---
 
-## Step 2 - Create Resource Group
+### Step 2 - Create Resource Group
 
 ```bash
 az group create --name rg-ws-crud-iac --location westeurope
 ```
 
+> ✅ **Check:** Confirm resource group creation:
+> ```bash
+> az group show --name rg-ws-crud-iac
+> ```
+
 ---
 
-## Step 3 - Deploy Azure Container Registry (ACR)
+### Step 3 - Deploy Azure Container Registry (ACR)
 
 ```bash
 az deployment group create \
@@ -97,9 +115,17 @@ az deployment group create \
     --parameters acrName=acrwscrud
 ```
 
+> ⚠ **Note:**  
+> `acrName` must be globally unique across Azure.
+
+> ✅ **Check:** Verify ACR deployment:
+> ```bash
+> az acr show --name acrwscrud
+> ```
+
 ---
 
-## Step 4 - Enable Admin on ACR (Optional but recommended)
+### Step 4 - Enable Admin User on ACR (Recommended for Testing)
 
 ```bash
 az acr update -n acrwscrud --admin-enabled true
@@ -107,7 +133,7 @@ az acr update -n acrwscrud --admin-enabled true
 
 ---
 
-## Step 5 - Login to ACR
+### Step 5 - Login to ACR
 
 ```bash
 az acr login --name acrwscrud
@@ -115,13 +141,13 @@ az acr login --name acrwscrud
 
 ---
 
-## Step 6 - Get ACR Login Server
+### Step 6 - Get ACR Login Server URL
 
 ```bash
 az acr show --name acrwscrud --query loginServer --output table
 ```
 
-You will get output like:
+Expected output:
 
 ```text
 Result
@@ -131,30 +157,22 @@ acrwscrud.azurecr.io
 
 ---
 
-## Step 7 - Build Docker Image Locally
+### Step 7 - Build Docker Image Locally
 
-Make sure you are in the project root directory where the `src/` folder is located.
+Ensure you are in the **project root** (where the `src/` folder is located).
 
 ```bash
 docker build -t example-flask-crud ./src
 ```
 
-Check if the image is built:
-
-```bash
-docker images
-```
-
-Example output:
-
-```text
-REPOSITORY            TAG       IMAGE ID       CREATED          SIZE
-example-flask-crud    latest    9e6f52442326   About an hour ago  169MB
-```
+> ✅ **Check:** Confirm the image is built:
+> ```bash
+> docker images
+> ```
 
 ---
 
-## Step 8 - Tag the Docker Image for ACR
+### Step 8 - Tag Docker Image for ACR
 
 ```bash
 docker tag example-flask-crud acrwscrud.azurecr.io/example-flask-crud:v1
@@ -162,33 +180,35 @@ docker tag example-flask-crud acrwscrud.azurecr.io/example-flask-crud:v1
 
 ---
 
-## Step 9 - Push the Image to ACR
+### Step 9 - Push Docker Image to ACR
 
 ```bash
 docker push acrwscrud.azurecr.io/example-flask-crud:v1
 ```
 
----
-
-## Step 10 - Verify Image in ACR
-
-```bash
-az acr repository list --name acrwscrud --output table
-```
+> ✅ **Check:** List repositories inside your ACR:
+> ```bash
+> az acr repository list --name acrwscrud --output table
+> ```
 
 ---
 
-## Step 11 - Retrieve ACR Credentials (needed for deployment)
+### Step 10 - Retrieve ACR Credentials (for Infrastructure Deployment)
 
 ```bash
 az acr credential show -n acrwscrud --query "{username:username, password:passwords[0].value}"
 ```
 
+Save these for the next step.
+
+> ⚠ **Security Tip:**  
+> Never commit these credentials into Git or share them.
+
 ---
 
-## Step 12a - Deploy the Basic Infrastructure
+### Step 11 - Deploy Infrastructure
 
-Replace `<username>` and `<password>` with the actual values retrieved from Step 11.
+#### Option A - Basic Infrastructure Deployment
 
 ```bash
 az deployment group create \
@@ -197,9 +217,7 @@ az deployment group create \
     --parameters acrUsername=<username> acrPassword=<password>
 ```
 
-## Step 12b - Deploy the Full Infrastructure
-
-Replace `<username>` and `<password>` with the actual values retrieved from Step 11.
+#### Option B - Full Infrastructure Deployment
 
 ```bash
 az deployment group create \
@@ -208,19 +226,21 @@ az deployment group create \
     --parameters acrUsername=<username> acrPassword=<password>
 ```
 
+> 💡 **Tip:**  
+> Replace `<username>` and `<password>` with actual values from **Step 10**.
+
+> ✅ **Check:** Confirm deployment success:
+> ```bash
+> az deployment group show --resource-group rg-ws-crud-iac
+> ```
+
 ---
 
-## Optional - Clean up (Delete Everything)
+### Optional - Full Cleanup (Manual)
 
 ```bash
 az group delete --name rg-ws-crud-iac --yes
 ```
 
----
-
-Would you like me also to make it even more professional with:
-1. ✅ Command explanations inline  
-2. ✅ Optional validation commands between steps  
-3. ✅ Tip boxes (like best practices, common errors, etc.)  
-
-It could make it perfect for sharing with your team or future you. Just say *yes*, and I’ll polish it more!
+> ⚠ **Warning:**  
+> This will **irreversibly delete** all resources inside `rg-ws-crud-iac`.
