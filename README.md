@@ -25,8 +25,9 @@ To deploy everything automatically, simply execute:
 - Creates the Resource Group
 - Deploys the Azure Container Registry (ACR)
 - Enables Admin on ACR (for easier development)
+- Logs in to ACR
 - Builds, tags, and pushes the Docker Image to ACR
-- Deploys infrastructure using your Bicep templates
+- Deploys infrastructure using my Bicep templates
 
 > 💡 **Tip**  
 > Make sure the script is executable before running it:
@@ -121,15 +122,8 @@ az deployment group create \
 
 ---
 
-### Step 4 - Enable Admin User on ACR (Recommended for Testing)
 
-```bash
-az acr update -n acrwscrud --admin-enabled true
-```
-
----
-
-### Step 5 - Login to ACR
+### Step 4 - Login to ACR
 
 ```bash
 az acr login --name acrwscrud
@@ -137,7 +131,7 @@ az acr login --name acrwscrud
 
 ---
 
-### Step 6 - Get ACR Login Server URL
+### Step 5 - Get ACR Login Server URL
 
 ```bash
 az acr show --name acrwscrud --query loginServer --output table
@@ -153,7 +147,7 @@ acrwscrud.azurecr.io
 
 ---
 
-### Step 7 - Build Docker Image Locally
+### Step 6 - Build Docker Image Locally
 
 Ensure you are in the **project root** (where the `src/` folder is located).
 
@@ -168,7 +162,7 @@ docker build -t example-flask-crud ./src
 
 ---
 
-### Step 8 - Tag Docker Image for ACR
+### Step 7 - Tag Docker Image for ACR
 
 ```bash
 docker tag example-flask-crud acrwscrud.azurecr.io/example-flask-crud:v1
@@ -176,7 +170,7 @@ docker tag example-flask-crud acrwscrud.azurecr.io/example-flask-crud:v1
 
 ---
 
-### Step 9 - Push Docker Image to ACR
+### Step 8 - Push Docker Image to ACR
 
 ```bash
 docker push acrwscrud.azurecr.io/example-flask-crud:v1
@@ -189,7 +183,7 @@ docker push acrwscrud.azurecr.io/example-flask-crud:v1
 
 ---
 
-### Step 10 - Retrieve ACR Credentials (for Infrastructure Deployment)
+### Step 9 - Retrieve ACR Credentials (for Infrastructure Deployment)
 
 ```bash
 az acr credential show -n acrwscrud --query "{username:username, password:passwords[0].value}"
@@ -202,7 +196,7 @@ Save these for the next step.
 
 ---
 
-### Step 11 - Deploy Infrastructure
+### Step 10 - Deploy Infrastructure
 
 #### Option A - Basic Infrastructure Deployment
 
