@@ -17,7 +17,7 @@
 To deploy everything automatically, simply execute:
 
 ```bash
-bash deploy.sh
+./deploy.sh
 ```
 
 ### What this script does:
@@ -41,7 +41,7 @@ bash deploy.sh
 To remove **all resources** (Resource Group and everything inside), run:
 
 ```bash
-bash clean.sh
+./clean.sh
 ```
 
 ### What this script does:
