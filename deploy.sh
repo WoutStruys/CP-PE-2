@@ -142,7 +142,7 @@ echo -e "${GREEN}ACR Password: $ACR_PASSWORD${NC}"
 echo -e "${BLUE}==> Deploying Basis Setup...${NC}"
 output=$(az deployment group create \
   --resource-group rg-ws-crud-iac \
-  --template-file ./infra/basic.bicep \
+  --template-file ./infra/full.bicep \
   --parameters acrUsername=$ACR_USERNAME acrPassword=$ACR_PASSWORD)
 
 parse_deploy_output "$output"

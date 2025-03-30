@@ -43,6 +43,19 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
   }
 }
 
+resource appGwPublicIp 'Microsoft.Network/publicIPAddresses@2023-04-01' = {
+  name: 'appgw-publicip-ws'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+
+
 // Network Security Group
 resource nsg 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
   name: 'nsg-ws'
@@ -50,7 +63,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
   properties: {
     securityRules: [
       {
-        name: 'Allow-HTTP'
+        name: 'Allow-HTTP-Inbound'
         properties: {
           priority: 100
           direction: 'Inbound'
@@ -62,11 +75,26 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2023-04-01' = {
           destinationAddressPrefix: '*'
         }
       }
+      {
+        name: 'Allow-Internet-Outbound'
+        properties: {
+          priority: 200
+          direction: 'Outbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: 'Internet'
+        }
+      }
     ]
   }
 }
 
-// Virtual Network + Subnet
+
+param appGwSubnetName string = 'subnet-appgw-ws'
+
 resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
   name: vnetName
   location: location
@@ -84,13 +112,128 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' = {
           networkSecurityGroup: {
             id: nsg.id
           }
+          privateEndpointNetworkPolicies: 'Disabled'
+          delegations: [
+            {
+              name: 'aciDelegation'
+              properties: {
+                serviceName: 'Microsoft.ContainerInstance/containerGroups'
+              }
+            }
+          ]
+        }
+      }
+      {
+        name: appGwSubnetName
+        properties: {
+          addressPrefix: '10.0.2.0/24'
         }
       }
     ]
   }
 }
 
-// Container Group (ACI)
+
+
+resource appGw 'Microsoft.Network/applicationGateways@2023-04-01' = {
+  name: 'appgw-ws'
+  location: location
+  properties: {
+    sku: {
+      name: 'Standard_v2'
+      tier: 'Standard_v2'
+    }
+    autoscaleConfiguration: {
+      minCapacity: 1
+    }
+    gatewayIPConfigurations: [
+      {
+        name: 'appGwIpConfig'
+        properties: {
+          subnet: {
+            id: vnet.properties.subnets[1].id // subnet-appgw-ws
+          }
+        }
+      }
+    ]
+    frontendIPConfigurations: [
+      {
+        name: 'appGwFrontend'
+        properties: {
+          publicIPAddress: {
+            id: appGwPublicIp.id
+          }
+        }
+      }
+    ]
+    frontendPorts: [
+      {
+        name: 'port-80'
+        properties: {
+          port: 80
+        }
+      }
+    ]
+    backendAddressPools: [
+      {
+        name: 'aci-backend'
+        properties: {
+          backendAddresses: [
+            {
+              ipAddress: containerGroup.properties.ipAddress.ip // Gets ACI Private IP
+            }
+          ]
+        }
+      }
+    ]
+    backendHttpSettingsCollection: [
+      {
+        name: 'http-setting'
+        properties: {
+          port: 80
+          protocol: 'Http'
+          pickHostNameFromBackendAddress: false
+          requestTimeout: 30
+        }
+      }
+    ]
+    httpListeners: [
+      {
+        name: 'http-listener'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', 'appgw-ws', 'appGwFrontend')
+          }
+          frontendPort: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', 'appgw-ws', 'port-80')
+          }
+          protocol: 'Http'
+        }
+      }
+    ]
+    requestRoutingRules: [
+      {
+        name: 'rule1'
+        properties: {
+          ruleType: 'Basic'
+          priority: 100 
+          httpListener: {
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', 'appgw-ws', 'http-listener')
+          }
+          backendAddressPool: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', 'appgw-ws', 'aci-backend')
+          }
+          backendHttpSettings: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', 'appgw-ws', 'http-setting')
+          }
+        }
+      }
+    ]
+    
+    
+  }
+}
+
 resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: name
   location: location
@@ -117,6 +260,15 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01'
     ]
     osType: 'Linux'
     restartPolicy: 'Always'
+    ipAddress: {
+      type: 'Private'
+      ports: [
+        {
+          port: 80
+          protocol: 'TCP'
+        }
+      ]
+    }
     imageRegistryCredentials: [
       {
         server: 'acrwscrud.azurecr.io'
@@ -130,8 +282,15 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01'
         workspaceKey: logAnalyticsSharedKeys.primarySharedKey
       }
     }
+    subnetIds: [
+      {
+        id: vnet.properties.subnets[0].id
+      }
+    ]
   }
 }
+
+
 
 // Output Public IP
 output publicIpAddress string = containerGroup.properties.ipAddress.ip
