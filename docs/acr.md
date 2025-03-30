@@ -1,6 +1,6 @@
 # Azure Container Registry (ACR) Deployment - Bicep Template
 
-This Bicep template provisions an **Azure Container Registry (ACR)** in your Azure subscription.
+This Bicep template provisions an **Azure Container Registry (ACR)** in your Azure Resource Group.
 
 ## 📄 What does this template do?
 
