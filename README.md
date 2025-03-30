@@ -2,10 +2,14 @@
 
 # Inhoud
 
-- [Diagram](#diagram)
+- [Diagram](docs/diagram.md)
+- [ACR Deployment Documentation](docs/acr.md)
+- [Basic Infrastructure Documentation](docs/basic.md)
+- [Full Infrastructure Documentation](docs/full.md)
 - [Automatic Deployment](#automatic-deployment-recommended)
 - [Automatic Cleanup](#automatic-cleanup)
 - [Manual Deployment (Step by Step)](#manual-deployment-step-by-step)
+
 
 
 ## Diagram
